@@ -1,10 +1,28 @@
-read.QX <- function(directory, nr.r = NA){
+## Function to read the raw fluorescence output files from the Biorad QX200
+## digital PCR platform. Files can be exported by choosing ........
+## The program will create one .csv file per reaction (well). All files
+## should be placed into one folder. The latter's path (eg. "D:/Documents/dPCR Run")
+## is submitted as a string to the function below.
+## The QX .csv files should be the ONLY .csv files in the directory.
+## Otherwise errors will occur!
 
-##‘directory’ is a character vector of length 1 indicating the location of the CSV files
-##`nr.r‘ is an optional number indicating the number of rows in the matrix (missing values will be padded with NA)
- #      (if nr.r = NA, the largest number of droplets found will be used)
-## The QX .csv files should be the ONLY .csv files in the directory. Otherwise errors will occur!
+## Input:
+ #‘directory’ is a character vector of length 1 indicating the location of the CSV files
+ #`nr.r‘      is an optional number indicating the number of rows in the matrix (missing values will be padded with NA)
+ #            (if nr.r = NA, the largest number of droplets found will be used)
+ # autoname   logical. If TRUE the well names are collected from the csv files
+ #            and used as column names. Only works if there are 96 or less csv files
+ #            If there are more, a warning message will be reported. Problems
+ #            may occur if additional underscores ("_") are present in the name of the run/experiment.
 
+## Output:
+ # The function creates a list containing two matrices with fluorescence
+ # readings (one for each channel: $Ch1 and $Ch2). The matrix has as many columns
+ # as there are samples. The number of rows can be either set (max: approx 23500)
+ # otherwise, the number of rows equals the largest number of readings found.
+ # Missing values are reported as NA.
+
+read.QX <- function(directory, nr.r = NA, autoname = TRUE){
 ##Prepping to read
   bup <- getwd()   #save current work directory
   setwd(directory) #go to data directory
@@ -32,7 +50,25 @@ read.QX <- function(directory, nr.r = NA){
                 }
         }
 
-##step two: trimming
+##step two (optional): extract colnames from files
+  if(isTRUE(autoname)){
+    wells <- vector()
+    for(i in seq_along(files)){  #extract colnames from each file
+        wells <- append(wells, sub("?.*_(.*?)_.*","\\1",files[i]))
+    }
+   #check for errors and report:
+    if(length(wells) > 96 | length(wells) > length(files)){
+      if(length(wells) > 96){
+          message("more than 96 names found, switching off autoname")
+      }else{
+          message("more names than columns found, switching off autoname")
+      }
+    }else{  # add names to matrices
+      colnames(output.Ch1) <- wells
+      colnames(output.Ch2) <- wells
+    }
+  }
+##step three: trimming
   if(isTRUE(nr.r > r.max)){ #in this case we leave padding
    output.Ch1 <- output.Ch1[1:nr.r, ]
    output.Ch2 <- output.Ch2[1:nr.r, ]
@@ -44,7 +80,7 @@ read.QX <- function(directory, nr.r = NA){
            message(paste("nr.r increased to ",r.max))}
   }
 
-##step three: output
+##step four: output
   setwd(bup) #return to previous wd
   return(list(Ch1 = output.Ch1, Ch2 = output.Ch2))
 }
