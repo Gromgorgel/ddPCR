@@ -54,3 +54,5 @@ When `plots = TRUE` the algortihm will produce two graphical windows with three 
   * `percentage of sample compartmentalized` (horizontal lines represent the 0.3 and 0.5 limits)
   * `droplet count`: positive and negative droplets (stacked) scaled to the total number of droplets in the analysis
 
+### Using cloudy for non-Biorad data
+Even though the algorithm was design for use with data produced by the Biorad QX platform, there is no immediate reason the procedure cannot be applied to dPCR data from another source. The algorithm expects a vector as input in which each value is the endpoint flourescence reading from a single chamber/droplet. As long as the input meets these expectations, the output should make sense. 
