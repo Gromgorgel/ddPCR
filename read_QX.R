@@ -1,10 +1,12 @@
 ## Function to read the raw fluorescence output files from the Biorad QX200
-## digital PCR platform. Files can be exported by choosing ........
+## digital PCR platform. Files can be exported by choosing options>export amplitude and cluster data
 ## The program will create one .csv file per reaction (well). All files
 ## should be placed into one folder. The latter's path (eg. "D:/Documents/dPCR Run")
 ## is submitted as a string to the function below.
 ## The QX .csv files should be the ONLY .csv files in the directory.
 ## Otherwise errors will occur!
+
+ # Updates will appear at: github.com/Gromgorgel
 
 ## Input:
  #‘directory’ is a character vector of length 1 indicating the location of the CSV files
