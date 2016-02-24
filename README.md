@@ -48,7 +48,7 @@ cloudy(drp, dVol = 0.85, sVol = 20, plots = FALSE, silent = TRUE, vec = FALSE)
 When `plots = TRUE` the algortihm will produce two graphical windows with three visual representations of the analysis and its results (two in the first window, one in the second):
 - The first window's **plot A** contains a kernel density plot of the flourescence values, population boundaries and peaks are indicated with vertical dashed lines. 
 - The first window's **plot B** contains a dot plot of the fluorescence readings (randomized order), each popultion is coloured differently, a horizontal line represents the threshold that was set by the algorithm
-- The second window (**plot C**) contains a barplot with the relative values of the performance paramters. Four parameter values are shown (and scaled to be comparable). 
+- The second window contains a barplot with the relative values of the performance paramters. Four parameter values are shown (and scaled to be comparable). 
   * `Resolution` (devided by 10), the horizontal line represents the 2.5 (0.25) acceptance limit
   * `Percentage rain` (multiplied by 10), the horizontal line represents the 2.5% (0.25) rejection limit
   * `percentage of sample compartmentalized` (horizontal lines represent the 0.3 and 0.5 limits)
