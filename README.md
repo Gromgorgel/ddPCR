@@ -54,5 +54,26 @@ When `plots = TRUE` the algortihm will produce two graphical windows with three 
   * `percentage of sample compartmentalized` (horizontal lines represent the 0.3 and 0.5 limits)
   * `droplet count`: positive and negative droplets (stacked) scaled to the total number of droplets in the analysis
 
+### Example
+please have all .R and .RData files from this branch in your working directory before running the example. Installation of the package `SuppDists` may be required before the algorithm functions.
+
+```
+load("dpcr-Example.RData")
+source("Cloudy-V2-04.r")
+
+# Analyse a single reaction
+cloudy(dd.pcr$Ch1[, 1])
+
+# Analyse a single reaction with plots
+cloudy(dd.pcr$Ch1[, 1], plots = T)
+
+# Example of a reaction with multiple populations
+cloudy(dd.pcr$Ch1[, 25], plots = T)
+
+# Example of batch analysis
+results <- apply(dd.pcr$Ch1, 2, cloudy, vec = T)
+head(results[, 1:2])
+```
+
 ### Using cloudy for non-Biorad data
 Even though the algorithm was design for use with data produced by the Biorad QX platform, there is no immediate reason the procedure cannot be applied to dPCR data from another source. The algorithm expects a vector as input in which each value is the endpoint flourescence reading from a single chamber/droplet. As long as the input meets these expectations, the output should make sense. 
