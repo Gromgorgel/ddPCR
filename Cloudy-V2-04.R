@@ -2,7 +2,8 @@
 ## This is the algorithm for digital PCR analysis from raw compartment fluorescence measurements
 ## This algorithm is supplemental material to the publication "Measuring digital PCR quality: Performance Parameters and their Optimization"
 ## by Antoon Lievens, Sara Jacchia, Dafni Kagkli and Cristian Savini, and Maddalena Querci 
- # contact: antoon.lievens@ec.europa.eu
+
+ # Updates will appear at: github.com/Gromgorgel
 
 ## ARGUMENTS ###############
 ## 'drp' a numeric vector of all (endpoint) fluorescence measurments in a digital reaction
@@ -384,6 +385,8 @@ cloudy <- function (drp, dVol = 0.85, sVol = 20, plots = FALSE, silent = TRUE, v
      }
      #retrace kernel lines on top
       lines(krn[1, ] ~ krn[2, ], lwd = 1.5)
+     #Add Letter
+      mtext("A",side=3,cex=1.5,adj=1)
    #2#droplet view
      temp <- sample(c(1:length(drp)), size = length(cdrp), replace = F)
       plot(cdrp ~ temp, col = spectral[6], bty = "L", pch = 20 , xlab = "observation", ylab = "FU", ylim = c(min(drp), max(drp)))
@@ -396,7 +399,8 @@ cloudy <- function (drp, dVol = 0.85, sVol = 20, plots = FALSE, silent = TRUE, v
      temp <- sample(c(1:length(drp)), size = length(ddrp), replace = F)
       points(ddrp ~ temp, pch = 20, col = spectral[8])
      abline(h=tresh, col = "gray40", lty = 3)
-     #dev.off()
+     #Add Letter
+      mtext("B",side=3,cex=1.5,adj=1)
   #2#barplots of performance
     colrs <- c(rep(spectral[6],times=7),spectral[1])
     if(Resol > 2.5){colrs[1:2] <- two.color[c(1,1)]}
