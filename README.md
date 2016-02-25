@@ -25,7 +25,7 @@ read.QX(directory, nr.r = NA, autoname = TRUE)
 Unzip the folder contained in `example.zip` into you working directory and have all .R and files from this branch placed there as well before running the example. 
 
 ```
-source("Cloudy-V2-04.R")
+source("read_QX.R")
 
 # read files from folder
 d.data <- read.QX(directory = "example QXfiles")
