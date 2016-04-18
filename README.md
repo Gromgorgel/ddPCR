@@ -4,9 +4,9 @@ The two scripts are:
 - cloudy.R
 - read_QX.R
 
-Both algorithm were originally provided as supplemental material to the publication "Measuring digital PCR quality: Performance Parameters and their Optimization" by Antoon Lievens, Sara Jacchia, Dafni Kagkli and Cristian Savini, and Maddalena Querci (*link to Plos One article goes here once publication is finalized*).
+Both algorithm were originally provided as supplemental material to the publication "Measuring digital PCR quality: Performance Parameters and their Optimization" by Antoon Lievens, Sara Jacchia, Dafni Kagkli and Cristian Savini, and Maddalena Querci (*link to Plos One article goes here once publication is finalized*). In addition, this branch also contains the full dataset on which the publication was based (`Dataset.zip`) which may be used to further explore the functions of the scripts provided.  
 
-The following paragraphs contain a brief overview of the functionality of the algorithms. Details on their use is also contained as commented text in the .R files themselves.
+The following paragraphs contain a brief overview of the functionality of the algorithms. Details on their use is also contained as commented text in the .R files themselves. The last paragraph contains information on the structure of the dataset provided (i.e. `Dataset.zip`).
 
 ## The 'read.QX' algorithm
 This function reads the fluorescence values, as exported from the Biorad Quantasoft software, into R. To export the fluorescence readings, choose `options > export amplitude and cluster data` in the `setup` tab of the Quantasoft software (V1.6.6.0320). The software will prompt you to choose folder, for use with read_QX.R it is recommended that you choose an empty folder. For each well in the analysis, a .csv file will be created that contains the fluorescence reads for each channel as well as the assigned cluster.
@@ -92,3 +92,19 @@ head(results[, 1:2])
 
 ### Using cloudy for non-Biorad data
 Even though the algorithm was design for use with data produced by the Biorad QX platform, there is no immediate reason the procedure cannot be applied to dPCR data from another source. The algorithm expects a vector as input in which each value is the endpoint fluorescence reading from a single chamber/droplet. As long as the input meets these expectations, the output should make sense. 
+
+## 'Dataset.zip': contents and strucuture
+The dataset is provided as a zipped `.csv` file. The contains 16996 rows by 473 columns. The first columnd contains the rownames, each subsequent column is a digital PCR reaction. The rows contain the following information:
+ * `react-ID` : 1 to 472. Numerical identifier of each reaction.
+ * `plate-ID`: 1 to 9. Numerical identifier of each plate. A total of 9 plates was run, representing the different experiments in the dataset. *Plate 1* tests all PCR targets in 4 repeats using qPCR validated conditions. *Plate 2* is the primer/probe concentration gradient. *Plate 3* is the "rain" dilution series. *Plate 4* tests the PCR enhancers. *Plate 5* is the cycle gradient. *Plate 6* is the sonication gradient. *Plate 7* is the annealing temperature gradient. *Plate 8* tests digital touchdown PCR. *Plate 9* is the final run of reactions under optimized conditions.
+ * `target` : name of the PCR target
+ * `Primers` : Primer concentration in nM
+ * `Probe` : Probe concentration in nM
+ * `Anneal` : Annealing temperature used during the run.
+ * `Touchdown` : Was digital touchdown PCR used? Either `Y` or `N`.
+ * `Enhancer` : PCR enhancer that was added to the reaction. `NA` if no enhancer was used.
+ * `Cycles` : Number of cycles run.
+ * `Sonication` : Amount of sonication (in seconds). `NA` if the sample was not sonicated. 
+ * `FU0001` to `FU16985` : The droplet fluorescence values. In case there are less than 16985 droplets in a reaction, `NA` is used to padd the column.
+  
+ If these descriptions do not seem meaningful, you might want to read our publication (*link goes here one more time*) for more background on the experiments.
