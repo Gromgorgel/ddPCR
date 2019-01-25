@@ -1,10 +1,11 @@
 # Digital Droplet PCR analysis
 This branch contains two R scripts related to digital PCR analysis. Both scripts were written to handle output from the Biorad QX200 platform, but the main analysis algortighm (cloudy.R) should be able to handle any type of digital PCR output provided the data have the correct format (more on that later).
+
 The two scripts are:
 - cloudy.R
 - read_QX.R
 
-Both algorithm were originally provided as supplemental material to the publication "*Measuring digital PCR quality: Performance Parameters and their Optimization*" by Antoon Lievens, Sara Jacchia, Dafni Kagkli, Cristian Savini, and Maddalena Querci ([link](http://dx.doi.org/10.1371/journal.pone.0153317)). In addition, this branch also contains the full dataset on which the publication was based (`Dataset.zip`) which may be used to further explore the functions of the scripts provided.  
+Algorithm cloudy_V2-04 & read_QX  were originally provided as supplemental material to the publication "*Measuring digital PCR quality: Performance Parameters and their Optimization*" by Antoon Lievens, Sara Jacchia, Dafni Kagkli, Cristian Savini, and Maddalena Querci ([link](http://dx.doi.org/10.1371/journal.pone.0153317)). The cloudy algorithm has since evolved to V2-05, but V2-04 remains available. In addition, this branch also contains the full dataset on which the publication was based (`Dataset.zip`) which may be used to further explore the functions of the scripts provided.  
 
 The following paragraphs contain a brief overview of the functionality of the algorithms. Details on their use is also contained as commented text in the .R files themselves. The last paragraph contains information on the structure of the dataset provided (i.e. `Dataset.zip`).
 
@@ -46,6 +47,7 @@ The standard function output is a list with the following components:
 - `performance`, a numerical vector of length three containing the performance paramters calculated from the input data: `resolution`, ratio of rain to total compartments (`%rain`), and the degree of compartmentalization (`%comparted`)
 - `droplets`, a numerical vector of length three containing the number of compartments counted in each category (`positive`, `negative`, & `rain`).
 - `populations`, a numerical of length 1, the number of fluorescence populations as detected by the algorithm 
+- `threshold`, a numerical of length 1, the fluorescence value used as threshold 
 
 Note that if `vec` is set to `TRUE`, all of the above parameters are returned in a single vector rather than as a list
  
@@ -59,6 +61,7 @@ cloudy(drp, dVol = 0.85, sVol = 20, plots = FALSE, silent = TRUE, vec = FALSE)
 - `plots` is a logical, if set to `TRUE` plots will be generated (see below)
 - `silent` is a logical, if is set to `FALSE` warning messages will be generated detailing the choices the algorithm makes when deviating from the standard analysis routine. 
 - `vec` is a logical, if set to `TRUE` the results will be returned in a vector instead of a list. This is useful when you batch analyse dPCR reactions using `apply` and want the results to be returned as a matrix.
+- `threshold` is an optional numerical of length 1, it manually sets the threshold for counting positive and negative droplets (in Fluorescence Units) and overrides the algorithms calculations. The algorithm will still try to define the populations in order to calculate the other statistics. Note that even when wrong or invalid (eg below the negative population) the manual threshold will not be overruled.
 
 When `plots = TRUE` the algortihm will produce two graphical windows with three visual representations of the analysis and its results (two in the first window, one in the second):
 - The first window's **plot A** contains a kernel density plot of the fluorescence values, population boundaries and peaks are indicated with vertical dashed lines. 
@@ -107,4 +110,4 @@ The dataset is provided as a zipped `.csv` file. The is essentially a matrix of 
   * `Sonication` : Amount of sonication (in seconds). `NA` if the sample was not sonicated. 
   * `FU0001` to `FU16985` : The droplet fluorescence values. In case there are less than 16985 droplets in a reaction, `NA` is used to padd the column.
   
- If these descriptions do not seem meaningful, you might want to read our publication (*link goes here one more time*) for more background on the experiments.
+ If these descriptions do not seem meaningful, you might want to read our publication ([link](http://dx.doi.org/10.1371/journal.pone.0153317)) for more background on the experiments.
