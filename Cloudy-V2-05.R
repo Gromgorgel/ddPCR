@@ -347,7 +347,7 @@ cloudy <- function (drp, dVol = 0.85, sVol = 20, plots = FALSE, silent = TRUE, v
     }##Control LVL 3 END
     ##############################
     # the next few controls are skipped if a threshold is specified (we don't want it to be overruled, even if it's wrong)
-    if(is.na(threshold){
+    if(is.na(threshold)){
     ##############################
     #excessive rain can make the standard deviations go haywire
     #we build in this simple check to make sure the treshold is not placed into the positive band
