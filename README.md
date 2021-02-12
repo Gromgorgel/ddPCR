@@ -5,7 +5,7 @@ The two scripts are:
 - cloudy.R
 - read_QX.R
 
-Algorithm cloudy_V2-04 & read_QX  were originally provided as supplemental material to the publication "*Measuring digital PCR quality: Performance Parameters and their Optimization*" by Antoon Lievens, Sara Jacchia, Dafni Kagkli, Cristian Savini, and Maddalena Querci ([link](http://dx.doi.org/10.1371/journal.pone.0153317)). The cloudy algorithm has since evolved to V2-05, but V2-04 remains available. In addition, this branch also contains the full dataset on which the publication was based (`Dataset.zip`) which may be used to further explore the functions of the scripts provided.  
+Algorithm cloudy_V2-04 & read_QX  were originally provided as supplemental material to the publication "*Measuring digital PCR quality: Performance Parameters and their Optimization*" by Antoon Lievens, Sara Jacchia, Dafni Kagkli, Cristian Savini, and Maddalena Querci ([link](http://dx.doi.org/10.1371/journal.pone.0153317)). The cloudy algorithm has since evolved to V2-08 & V03-03 (more on that below), but V2-04 remains available. In addition, this branch also contains the full dataset on which the publication was based (`Dataset.zip`) which may be used to further explore the functions of the scripts provided.  
 
 The following paragraphs contain a brief overview of the functionality of the algorithms. Details on their use is also contained as commented text in the .R files themselves. The last paragraph contains information on the structure of the dataset provided (i.e. `Dataset.zip`).
 
@@ -37,9 +37,22 @@ plot(sample(d.data$Ch1[, 1]), ylab = "Amplitude", bty = "L")
 
 ## The 'cloudy' algorithm
 
-This is the algorithm for digital PCR analysis from raw compartment fluorescence measurements
+This is the algorithm for digital PCR analysis from raw compartment fluorescence measurements, several versions are available.
 
-The original algorithm is supplemental material to the publication "Measuring digital PCR quality: Performance Parameters and their Optimization" by Antoon Lievens, Sara Jacchia, Dafni Kagkli and Cristian Savini, and Maddalena Querci (*link to Plos One article goes here once publication is finalized*). For details on the interpretation of results and background on the algorithm we refer the user to the original text of the publication.
+### V2.04
+This is the original algorithm provided as supplemental material to the publication "Measuring digital PCR quality: Performance Parameters and their Optimization" by Antoon Lievens, Sara Jacchia, Dafni Kagkli and Cristian Savini, and Maddalena Querci ([link](http://dx.doi.org/10.1371/journal.pone.0153317)). For details on the interpretation of results and background on the algorithm we refer the user to the original text of the publication.
+
+### V2.05 & 2.08
+These two versions are optimizations of the original algorithm, with version 2.08 being the final version of the V2 series of the algorithm. The main improvements are: general improvements for stability, removal of typos, increased robustness when dealing with overlapping populations, a manual threshold option, the threshold as calculated was added to output, and one of the plots was removed (performance parameter plot, it was not getting the point accross anyway).
+
+### V3.03
+This is the fist public version of the V3 series of the algortihm. This series has a thoroughly re-structured code that will allow further implementation of functions, chief of which is the ability to 'correct' for channel cross talk. The latter is a phenomenon caused by overlapping or overshining of color spectra of the dye(s) and as a result the measurements made in the 2 fluorescence channels are not entirely independent. This is most obvious from the 2D plot (channel 1 FU on x axis and channel 2 FU on y axis): in an ideal case increase in channel 1 fluorescence should not affect the y position of the droplets, instead we see that the channel 2 fluorescence also increases (droplets move diagonal on the plot instead of horizontal). The figure below illustrates this for an evagreen reaction: instead of the droplets all lying in the horizontal plane (all fluorescence limited to channel 1) we see a diagonal display as also channel 2 fluorescence increases when channel 1 FU reaches higher values. Ultimately, this affects the resolution of the assay.
+
+![crosstalk](crosstalk.png)
+
+The current version is able to correct for this to some degree (currenlty only intended for Evagreen reactions, but feel free to play around), which helps place the threshold in low resolution reactions. It has been tested on a wide array of reactions (more than 5000) and seems stable. Single channel analysis remains available as before. Note: since the cross-talk correction relies on a few iterations of algorithm application it runs slower. 
+
+### algorithm output and input
 
 The standard function output is a list with the following components:
 - `targets.in.sVol`, a numerical vector of length three containing the estimated number of targets in the sample volume (`targ.in.sVol`) and its Poisson confidence bounds (`upper`, `lower`).
@@ -52,9 +65,10 @@ The standard function output is a list with the following components:
 Note that if `vec` is set to `TRUE`, all of the above parameters are returned in a single vector rather than as a list
  
 The basic function call to cloudy takes the following arguments:
-```
-cloudy(drp, dVol = 0.85, sVol = 20, plots = FALSE, silent = TRUE, vec = FALSE)
-```
+
+V2 series :  `cloudy(drp, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE)`
+V3 series :  `cloudy(drp, method, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE, neg.ref = 13500)`
+
 - `drp` is a numeric vector of all (endpoint) fluorescence measurments in a digital reaction. Readings do **not** have to be ordored in any particular way although Quantasoft export is usually sorted from small to large. `NA` values are allowed (will be removed). Negative values are allowed as well (baseline subtraction may cause these in the Quantasoft export).
 - `dVol` is a numerical of length 1, the compartment (droplet) volume in nanoliter (standard = 0.85)
 - `sVol` is a  numerical of length 1, the sample volume in microliter (standard = 20) 
@@ -62,15 +76,13 @@ cloudy(drp, dVol = 0.85, sVol = 20, plots = FALSE, silent = TRUE, vec = FALSE)
 - `silent` is a logical, if is set to `FALSE` warning messages will be generated detailing the choices the algorithm makes when deviating from the standard analysis routine. 
 - `vec` is a logical, if set to `TRUE` the results will be returned in a vector instead of a list. This is useful when you batch analyse dPCR reactions using `apply` and want the results to be returned as a matrix.
 - `threshold` is an optional numerical of length 1, it manually sets the threshold for counting positive and negative droplets (in Fluorescence Units) and overrides the algorithms calculations. The algorithm will still try to define the populations in order to calculate the other statistics. Note that even when wrong or invalid (eg below the negative population) the manual threshold will not be overruled.
+- `method` = (V3 only) string, type of analysis to be made. One of the following: "simplex", "simplex2", or "eva" ('simplex' = standard 'cloudy' analysis of the flourescence in channel 1, 'simplex2' = standard 'cloudy' analysis of the flourescence in channel 2, 'eva' = simplex analysis of channel 1 with channel crosstalk correction using channel 2 (designed for Evagreen)). (standard = "simplex)
+- `neg.ref` = (V3 only) is a numerical of length 1. This provides a reference where the algorithm expects the negative popultation to be. This will only be used when the algorithm can only find a single population: it wil serve as a reference to decide it the droplets are all negative or all positive. 
 
 When `plots = TRUE` the algortihm will produce two graphical windows with three visual representations of the analysis and its results (two in the first window, one in the second):
 - The first window's **plot A** contains a kernel density plot of the fluorescence values, population boundaries and peaks are indicated with vertical dashed lines. 
 - The first window's **plot B** contains a dot plot of the fluorescence readings (randomized order), each popultion is coloured differently, a horizontal line represents the threshold that was set by the algorithm
-- The second window contains a barplot with the relative values of the performance paramters. Four parameter values are shown (and scaled to be comparable). 
-  * `Resolution` (devided by 10), the horizontal line represents the 2.5 (0.25) acceptance limit
-  * `Percentage rain` (multiplied by 10), the horizontal line represents the 2.5% (0.25) rejection limit
-  * `percentage of sample compartmentalized` (horizontal lines represent the 0.3 and 0.5 limits)
-  * `droplet count`: positive and negative droplets (stacked) scaled to the total number of droplets in the analysis
+- (V3 only) second window: when applicable, shows the effect of the cross-talk correction (2D droplet plots: before & after correction)
 
 ### Example
 Please have all .R and .RData files from this branch in your working directory before running the example. Installation of the package `SuppDists` may be required before the algorithm functions.
