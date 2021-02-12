@@ -52,6 +52,8 @@ This is the fist public version of the V3 series of the algortihm. This series h
 
 The current version is able to correct for this to some degree (currenlty only intended for Evagreen reactions, but feel free to play around), which helps place the threshold in low resolution reactions. It has been tested on a wide array of reactions (more than 5000) and seems stable. Single channel analysis remains available as before. Note: since the cross-talk correction relies on a few iterations of algorithm application it runs slower. 
 
+Another new feature of V3.03 is that the algorithm will automaticall recognize if it is being applied to multiple reactions and will analyze all at once. When reading multiple reactions with `read.QX` you can call `cloudy` on the resulting list and all reactions will be analyzed.
+
 ### algorithm output and input
 
 The standard function output is a list with the following components:
