@@ -30,7 +30,7 @@ read.QX <- function(directory, nr.r = NA, autoname = TRUE){
   setwd(directory) #go to data directory
 
 ##step one: read the files required from the directory
-  d.max <- round(20/0.00085, digits = -1) #maximum number of droplet reads possible
+  d.max <- round(20/0.00085, digits = -1) *1.275 #maximum number of droplet reads possible, add 27.5% extra as some reactions have been yielding more droplest than possible
   if(isTRUE(nr.r > d.max)){ #in case someone wants more padding than droplets are possible
                  message("this is not a good idea")
                  message(paste("nr.r reduced to ",d.max))
