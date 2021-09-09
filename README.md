@@ -70,8 +70,12 @@ The basic function call to cloudy takes the following arguments:
 
 V2 series :  `cloudy(drp, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE)`
 V3 series :  `cloudy(drp, method, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE, neg.ref = 13500)`
+V3.04 and higer :  `cloudy(drp, well, method, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE, neg.ref = 13500)`
 
-- `drp` is a numeric vector of all (endpoint) fluorescence measurments in a digital reaction. Readings do **not** have to be ordored in any particular way although Quantasoft export is usually sorted from small to large. `NA` values are allowed (will be removed). Negative values are allowed as well (baseline subtraction may cause these in the Quantasoft export).
+
+- `drp` is a numeric vector of all (endpoint) fluorescence measurments in a digital reaction in V2.XX but should be a named list in V3.XX. In the latter case, the input should contain 2 values ('Ch1' and 'Ch2') each of which should be a matrixcontaining the (endpoint) fluorescence measurments (one column per reaction). For both versions: the readings do **not** have to be ordored in any particular way although Quantasoft export is usually sorted from small to large. `NA` values are allowed (will be removed). Negative values are allowed as well (baseline subtraction may cause these in the Quantasoft export).
+- `well` (for V3.04 and onwards) is a vector (either numerical or character) that selects which reactions are analyzed. Either by column number (eg c(1,2,4,5)) or
+by column name (eg c("A01", "C02", "H12")) in the 'drp' input. defaults to 'all' (analyzes all reactions in the dataset). Note that if the numbers/names do not match existing columns there will be a warning and **all** reactions will be analyzed.
 - `dVol` is a numerical of length 1, the compartment (droplet) volume in nanoliter (standard = 0.85)
 - `sVol` is a  numerical of length 1, the sample volume in microliter (standard = 20) 
 - `plots` is a logical, if set to `TRUE` plots will be generated (see below)
@@ -96,14 +100,25 @@ source("Cloudy-V2-04.R")
 # Analyse a single reaction
 cloudy(dd.pcr$Ch1[, 1])
 
-# Analyse a single reaction with plots
+# Analyse a single reaction with plots under V2.XX series
 cloudy(dd.pcr$Ch1[, 1], plots = T)
 
 # Example of a reaction with multiple populations
 cloudy(dd.pcr$Ch1[, 25], plots = T)
 
-# Example of batch analysis
+# Example of batch analysis under V2.XX series
 results <- apply(dd.pcr$Ch1, 2, cloudy, vec = T)
+head(results[, 1:2])
+
+
+# Noteable differences in the V3 series:
+source("Cloudy-V3-04.R")
+# Analyse a single reaction with plots under V3.XX series
+results <- cloudy(dd.pcr, well = 1, plots = T, method = 'simplex')
+results <- cloudy(dd.pcr, well = 1, plots = T, method = 'eva')
+
+# Example of batch analysis under V3.XX series
+results <- cloudy(dd.pcr, vec = T)
 head(results[, 1:2])
 ```
 
