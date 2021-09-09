@@ -74,8 +74,8 @@ V3.04 and higer :  `cloudy(drp, well, method, dVol = 0.85, sVol = 20, threshold 
 
 
 - `drp` is a numeric vector of all (endpoint) fluorescence measurments in a digital reaction in V2.XX but should be a named list in V3.XX. In the latter case, the input should contain 2 values ('Ch1' and 'Ch2') each of which should be a matrixcontaining the (endpoint) fluorescence measurments (one column per reaction). For both versions: the readings do **not** have to be ordored in any particular way although Quantasoft export is usually sorted from small to large. `NA` values are allowed (will be removed). Negative values are allowed as well (baseline subtraction may cause these in the Quantasoft export).
-- `well` (for V3.04 and onwards) is a vector (either numerical or character) that selects which reactions are analyzed. Either by column number (eg c(1,2,4,5)) or
-by column name (eg c("A01", "C02", "H12")) in the 'drp' input. defaults to 'all' (analyzes all reactions in the dataset). Note that if the numbers/names do not match existing columns there will be a warning and **all** reactions will be analyzed.
+- `well` (for V3.04 and onwards) is a vector (either numerical or character) that selects which reactions are analyzed. Either by column number (eg `c(1,2,4,5)`) or
+by column name (eg `c("A01", "C02", "H12")`) in the 'drp' input. defaults to 'all' (analyzes all reactions in the dataset). Note that if the numbers/names do not match existing columns there will be a warning and **all** reactions will be analyzed.
 - `dVol` is a numerical of length 1, the compartment (droplet) volume in nanoliter (standard = 0.85)
 - `sVol` is a  numerical of length 1, the sample volume in microliter (standard = 20) 
 - `plots` is a logical, if set to `TRUE` plots will be generated (see below)
