@@ -137,11 +137,11 @@ Local use of the shiny app is most straightforward using [Rstudio](https://www.r
 ![shiny](run_app.png)
 
 ## MonoColor ddPlot
-This is a very short function to quickly plot digital PCR output. I have written this function mainly because the droplet amplitude values are **sorted** in the QX200 output and when plotted as such result something that is hard to interpret to human eyes. The function essentially just randomizes the readings before plotting, which also means that when you plot the same data twice it will look slightly different in both figures. The function is mainly intended as a tool to quickly inspect reactions when the results are not as you'd expect.
+This is a very short function to quickly plot digital PCR output. I have written this function mainly because the droplet amplitude values are **sorted** in the QX200 output and when plotted as such result in something that is hard to interpret to human eyes. The function essentially just randomizes the readings before plotting, which also means that when you plot the same data twice it will look slightly different in both figures. The function is mainly intended as a tool to quickly inspect reactions when the results are not as you'd expect.
 
 The basic function call to ddPlot takes the following argument:
 ```
-ddplotfunction(drp, ...)
+ddplot(drp, ...)
 ```
 - `drp` is a numeric vector of all (endpoint) fluorescence measurments in a digital reaction. `NA` values are allowed (will be removed).
 - `...` additional arguments and graphical parameters to be passed to the base `plot` command of R 
