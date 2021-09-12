@@ -2,12 +2,18 @@
 This branch contains two R scripts related to digital PCR analysis. Both scripts were written to handle output from the Biorad QX200 platform, but the main analysis algortighm (cloudy.R) should be able to handle any type of digital PCR output provided the data have the correct format (more on that later).
 
 The two scripts are:
-- cloudy.R
+- Cloudy-Vx-xx.R
 - read_QX.R
 
 Algorithm cloudy_V2-04 & read_QX  were originally provided as supplemental material to the publication "*Measuring digital PCR quality: Performance Parameters and their Optimization*" by Antoon Lievens, Sara Jacchia, Dafni Kagkli, Cristian Savini, and Maddalena Querci ([link](http://dx.doi.org/10.1371/journal.pone.0153317)). The cloudy algorithm has since evolved to V2-08 & V03-03 (more on that below), but V2-04 remains available. In addition, this branch also contains the full dataset on which the publication was based (`Dataset.zip`) which may be used to further explore the functions of the scripts provided.  
 
-The following paragraphs contain a brief overview of the functionality of the algorithms. Details on their use is also contained as commented text in the .R files themselves. The last paragraph contains information on the structure of the dataset provided (i.e. `Dataset.zip`).
+In addition, a few related functions have been added: a function to quickly plot digital PCR data and a shiny app based on the clpudy algorithm providing a graphical interface for users that are less comfortable with R's command line interface.
+
+Additional functions:
+- MonoColor ddplot.R
+- Shiny Cloud Vx-xx.R
+
+The following paragraphs contain a brief overview of the functionality of these algorithms and fucntions. In most cases, details on their use is also contained as commented text in the .R files themselves. The very last paragraph contains information on the structure of the dataset provided (i.e. `Dataset.zip`).
 
 ## The 'read.QX' algorithm
 This function reads the fluorescence values, as exported from the Biorad Quantasoft software, into R. To export the fluorescence readings, choose `options > export amplitude and cluster data` in the `setup` tab of the Quantasoft software (V1.6.6.0320). The software will prompt you to choose folder, for use with read_QX.R it is recommended that you choose an empty folder. For each well in the analysis, a .csv file will be created that contains the fluorescence reads for each channel as well as the assigned cluster.
@@ -45,14 +51,14 @@ This is the original algorithm provided as supplemental material to the publicat
 ### V2.05 & 2.08
 These two versions are optimizations of the original algorithm, with version 2.08 being the final version of the V2 series of the algorithm. The main improvements are: general improvements for stability, removal of typos, increased robustness when dealing with overlapping populations, a manual threshold option, the threshold as calculated was added to output, and one of the plots was removed (performance parameter plot, it was not getting the point accross anyway).
 
-### V3.03
-This is the fist public version of the V3 series of the algortihm. This series has a thoroughly re-structured code that will allow further implementation of functions, chief of which is the ability to 'correct' for channel cross talk. The latter is a phenomenon caused by overlapping or overshining of color spectra of the dye(s) and as a result the measurements made in the 2 fluorescence channels are not entirely independent. This is most obvious from the 2D plot (channel 1 FU on x axis and channel 2 FU on y axis): in an ideal case increase in channel 1 fluorescence should not affect the y position of the droplets, instead we see that the channel 2 fluorescence also increases (droplets move diagonal on the plot instead of horizontal). The figure below illustrates this for an evagreen reaction: instead of the droplets all lying in the horizontal plane (all fluorescence limited to channel 1) we see a diagonal display as also channel 2 fluorescence increases when channel 1 FU reaches higher values. Ultimately, this affects the resolution of the assay.
+### V3.03 & beyond
+V3.03 was the first public version of the V3 series of the algortihm. This series has a thoroughly re-structured code that will allow further implementation of additional functionalities, chief among which is the ability to 'correct' for channel cross talk. The latter is a phenomenon caused by overlapping or overshining of color spectra of the dye(s) and as a result the measurements made in the 2 fluorescence channels are not entirely independent. This is most obvious from the 2D plot (channel 1 FU on x axis and channel 2 FU on y axis): in an ideal case increase in channel 1 fluorescence should not affect the y position of the droplets, instead we see that the channel 2 fluorescence also increases (droplets move diagonal on the plot instead of horizontal). The figure below illustrates this for an evagreen reaction: instead of the droplets all lying in the horizontal plane (all fluorescence limited to channel 1) we see a diagonal display as also channel 2 fluorescence increases when channel 1 FU reaches higher values. Ultimately, this affects the resolution of the assay.
 
 ![crosstalk](crosstalk.png)
 
 The current version is able to correct for this to some degree (currenlty only intended for Evagreen reactions, but feel free to play around), which helps place the threshold in low resolution reactions. It has been tested on a wide array of reactions (more than 5000) and seems stable. Single channel analysis remains available as before. Note: since the cross-talk correction relies on a few iterations of algorithm application it runs slower. 
 
-Another new feature of V3.03 is that the algorithm will automaticall recognize if it is being applied to multiple reactions and will analyze all at once. When reading multiple reactions with `read.QX` you can call `cloudy` on the resulting list and all reactions will be analyzed.
+Another new feature of the V3 series is that the algorithm will automaticall recognize if it is being applied to multiple reactions and will analyze all at once. When reading multiple reactions with `read.QX` you can call `cloudy` on the resulting list and all reactions will be analyzed. Since version V3.04 it is also possible to specify which reactions to analyse when providing multiple reactions to the algorithm (via the `well` input variable).
 
 ### algorithm output and input
 
@@ -73,7 +79,7 @@ V3 series :  `cloudy(drp, method, dVol = 0.85, sVol = 20, threshold = NA, plots 
 V3.04 and higer :  `cloudy(drp, well, method, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE, neg.ref = 13500)`
 
 
-- `drp` is a numeric vector of all (endpoint) fluorescence measurments in a digital reaction in V2.XX but should be a named list in V3.XX. In the latter case, the input should contain 2 values ('Ch1' and 'Ch2') each of which should be a matrixcontaining the (endpoint) fluorescence measurments (one column per reaction). For both versions: the readings do **not** have to be ordored in any particular way although Quantasoft export is usually sorted from small to large. `NA` values are allowed (will be removed). Negative values are allowed as well (baseline subtraction may cause these in the Quantasoft export).
+- `drp` is a numeric vector of all (endpoint) fluorescence measurments in a digital reaction in V2.XX but should be a named list in V3.XX. In the latter case, the input should contain 2 objects ('Ch1' and 'Ch2') each of which should be a matrix containing the (endpoint) fluorescence measurments (one column per reaction) from the appropriate fluorescence channel. For both versions: the readings do **not** have to be ordored in any particular way although Quantasoft export is usually sorted from small to large. `NA` values are allowed (will be removed). Negative values are allowed as well (baseline subtraction may cause these in the Quantasoft export).
 - `well` (for V3.04 and onwards) is a vector (either numerical or character) that selects which reactions are analyzed. Either by column number (eg `c(1,2,4,5)`) or
 by column name (eg `c("A01", "C02", "H12")`) in the 'drp' input. defaults to 'all' (analyzes all reactions in the dataset). Note that if the numbers/names do not match existing columns there will be a warning and **all** reactions will be analyzed.
 - `dVol` is a numerical of length 1, the compartment (droplet) volume in nanoliter (standard = 0.85)
@@ -123,9 +129,34 @@ head(results[, 1:2])
 ```
 
 ### Using cloudy for non-Biorad data
-Even though the algorithm was design for use with data produced by the Biorad QX platform, there is no immediate reason the procedure cannot be applied to dPCR data from another source. The algorithm expects a vector as input in which each value is the endpoint fluorescence reading from a single chamber/droplet. As long as the input meets these expectations, the output should make sense. 
+Even though the algorithm was design for use with data produced by the Biorad QX platform, there is no immediate reason the procedure cannot be applied to dPCR data from another source. The algorithm expects a vector as input (V2 series) in which each value is the endpoint fluorescence reading from a single chamber/droplet. The V3 series expects a named list containing 2 objects ('Ch1' and 'Ch2') each of which should be a matrix containing the (endpoint) fluorescence measurments (one column per reaction) from the appropriate flourescence channel. The algorithm expects **both** channels to contain a matrix of the same dimension. So even if you don't intend to use a certain channel, make sure an equal size object is present in the other list entry. As long as the input meets these expectations, the output should make sense. 
 
-## 'Dataset.zip': contents and strucuture
+## The Shiny app for Cloudy
+Local use of the shiny app is most straightforward using [Rstudio](https://www.rstudio.com/) which is open source and available free of cost. To start the shiny app, open the script (Shiny Cloud Vx-xx.R) in Rstudio and click 'Run app' in the top right corner of the tab (see figure below). This will open a browser-like window with an interactive web page. The shiny version of cloudy currently only offers the analysis of a single reaction and only one flourescence channel (it runs the `simplex` method from the V3 algorithm series). There are instructions displayed once the app starts up, you will be directed to select a .csv file with dPCR data, once it has been loaded the other tabs on the page will load the results (plots, quantification, performance parameters). You can go back to the first tab to change some of the input variables (e.g. droplet volume, threshold, etc.) and see how this affects the results. 
+
+![shiny](run_app.png)
+
+## MonoColor ddPlot
+This is a very short function to quickly plot digital PCR output. I have written this function mainly because the droplet amplitude values are **sorted** in the QX200 output and when plotted as such result something that is hard to interpret to human eyes. The function essentially just randomizes the readings before plotting, which also means that when you plot the same data twice it will look slightly different in both figures. The function is mainly intended as a tool to quickly inspect reactions when the results are not as you'd expect.
+
+The basic function call to ddPlot takes the following argument:
+```
+ddplotfunction(drp, ...)
+```
+- `drp` is a numeric vector of all (endpoint) fluorescence measurments in a digital reaction. `NA` values are allowed (will be removed).
+- `...` additional arguments and graphical parameters to be passed to the base `plot` command of R 
+
+Usage example:
+
+```
+load("dpcr-Example.RData")
+source("MonoColor ddPlot.R")
+
+# plot a reaction
+ddplot(dd.pcr$Ch1[, 1])
+```
+
+## 'Dataset.zip':1 contents and strucuture
 The dataset is provided as a zipped `.csv` file. The is essentially a matrix of 16996 rows by 473 columns. The first column provides the rownames, each subsequent column is a digital PCR reaction. The rows contain the following information:
   * `react-ID` : 1 to 472. Numerical identifier of each reaction.
   * `plate-ID`: 1 to 9. Numerical identifier of each plate. A total of 9 plates was run, representing the different experiments in the dataset. **Plate 1** tests all PCR targets in 4 repeats using qPCR validated conditions. **Plate 2** is the primer/probe concentration gradient. **Plate 3** is the "rain" dilution series. **Plate 4** tests the PCR enhancers. **Plate 5** is the cycle gradient. **Plate 6** is the sonication gradient. **Plate 7** is the annealing temperature gradient. **Plate 8** tests digital touchdown PCR. **Plate 9** is the final run of reactions under optimized conditions.
