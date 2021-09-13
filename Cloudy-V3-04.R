@@ -92,7 +92,7 @@ cloudy <- function(drp, well = "all", method = c("simplex", "simplex2", "eva", "
 #Well selection
 ##################################################################################
 if(all(well == "all")){
-     break()
+     # do nothing
    }else{
      if(is.character(well)){
         if(any(well != "all")){
@@ -108,7 +108,6 @@ if(all(well == "all")){
      }}
     drp <- list(Ch1 = drp$Ch1[, well], Ch2 = drp$Ch2[, well])
    }
-
 ##################################################################################
 #Recursion
 ##################################################################################
@@ -118,9 +117,10 @@ if(is.matrix(drp$Ch1)){
                           "lambda", "lambda.upper", "lambda.lower",
                           "resolution", "%rain", "%comparted",
                           "positive", "negative", "rain", "populations", "threshlold")
+  colnames(multiput) <- colnames(drp$Ch1)
   for(s in 1:ncol(drp$Ch1)){
     subdrp <- list(Ch1 = drp$Ch1[, s], Ch2 = drp$Ch2[, s])
-    multiput[, s] <- cloudy(subdrp, method, neg.ref, threshold, dVol, sVol, plots, silent, vec = TRUE)
+    multiput[, s] <- cloudy(subdrp, well = "all", method, neg.ref, threshold, dVol, sVol, plots, silent, vec = TRUE)   # set well to "all" to prevent recursive subsampling
   }
   return(multiput)
 }else{
