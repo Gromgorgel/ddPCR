@@ -58,7 +58,7 @@ V3.03 was the first public version of the V3 series of the algortihm. This serie
 
 The current version is able to correct for this to some degree (currenlty only intended for Evagreen reactions, but feel free to play around), which helps place the threshold in low resolution reactions. It has been tested on a wide array of reactions (more than 5000) and seems stable. Single channel analysis remains available as before. Note: since the cross-talk correction relies on a few iterations of algorithm application it runs slower. 
 
-Another new feature of the V3 series is that the algorithm will automaticall recognize if it is being applied to multiple reactions and will analyze all at once. When reading multiple reactions with `read.QX` you can call `cloudy` on the resulting list and all reactions will be analyzed. Since version V3.04 it is also possible to specify which reactions to analyse when providing multiple reactions to the algorithm (via the `well` input variable).
+Another new feature of the V3 series is that the algorithm will automaticall recognize if it is being applied to multiple reactions and will analyze all at once. When reading multiple reactions with `read.QX` you can call `cloudy` on the resulting list and all reactions will be analyzed. Since version V3.04 it is also possible to restrict the algorithm to a specific reactions in a dataset (when providing multiple reactions) via the `well` input variable.
 
 ### algorithm output and input
 
@@ -74,8 +74,8 @@ Note that if `vec` is set to `TRUE`, all of the above parameters are returned in
  
 The basic function call to cloudy takes the following arguments:
 
-V2 series :  `cloudy(drp, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE)`
-V3 series :  `cloudy(drp, method, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE, neg.ref = 13500)`
+V2 series :  `cloudy(drp, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE)`  
+V3 series :  `cloudy(drp, method, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE, neg.ref = 13500)`  
 V3.04 and higer :  `cloudy(drp, well, method, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE, neg.ref = 13500)`
 
 
