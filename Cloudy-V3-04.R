@@ -497,7 +497,7 @@ if(all(checks)){
            drp1 <- drp1.bup
            piik <- piik.bup
            pops <- pops.bup
-           neg.reg <- neg.ref.bup
+           neg.ref <- neg.ref.bup
            rm(piik.bup, drp1.bup, pops.bup, bad.bup, neg.ref.bup) # cleanup
            # reset fail
            fail <- 0
