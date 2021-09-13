@@ -97,14 +97,14 @@ if(all(well == "all")){
      if(is.character(well)){
         if(any(well != "all")){
           if(all(well %in% colnames(drp$Ch1))){
-            well <- sapply(well, function(x) which(x == colnames(drops$Ch1)))
+            well <- sapply(well, function(x) which(x == colnames(drp$Ch1)))
           }else{
             message("WARNING: well names not found. Analyzing ALL data")
      }}
      }else{ #assuming well is numeric
-          if(!all(well %in% seq(from = 1, to = ncol(drops$Ch1), by = 1))){
+          if(!all(well %in% seq(from = 1, to = ncol(drp$Ch1), by = 1))){
             message("WARNING: well numbers out of bounds. Analyzing ALL data")
-            well <- seq(from = 1, to = ncol(drops$Ch1), by = 1)
+            well <- seq(from = 1, to = ncol(drp$Ch1), by = 1)
      }}
     drp <- list(Ch1 = drp$Ch1[, well], Ch2 = drp$Ch2[, well])
    }
