@@ -491,9 +491,9 @@ if(all(checks)){
         if(!any(is.na(piik.bup)) & fail == 1){ ## if that is the case, fail will be 1, in all other cases a valid piik will be produced
                                                 # actually, that's not true, threshfinder may have failed before, so we only restore if piik.bup
                                                 # does not contain any NA. Otherwise we keep fail == 1 & give up
-           badluck[5] <- TRUE
            # restore variables
            badluck <- bad.bup
+           badluck[5] <- TRUE # let user know we screwed up         
            drp1 <- drp1.bup
            piik <- piik.bup
            pops <- pops.bup
