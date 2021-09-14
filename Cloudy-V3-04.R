@@ -637,7 +637,7 @@ if(fail == 0){ ##Control LVL 2
       #plot1 <-  ggplot() + geom_density(data = dfdrops, aes(x = FU, fill = positive)) +  geom_density(alpha=0.4) +
       #         scale_fill_manual(labels = c("negative", "positive"), limits = c('FALSE', 'TRUE'), values = c('#F8766D', '#00BFC4'), name = "Population") +
       plot1 <- ggplot(plotdf, aes(x,y)) + geom_ribbon(aes(ymin=0, ymax=y, fill=dropsplit)) +  geom_line() +
-               scale_fill_manual(labels = c("negative", "positive"), limits = c(0, 1), values = c('#F8766D', '#00BFC4'), name = "Population") +
+               scale_fill_manual(labels = c("negative", "positive"), limits = factor(c(0, 1)), values = c('#F8766D', '#00BFC4'), name = "Population") +
                labs(tag = "A", x = "FU", y = "density")
       if(fail == 0){ #piik lines can only be added if piik is not NA
                plot1 <- plot1 + geom_vline(data = dfpiik, aes(xintercept = x.FU), linetype = "dashed") +
