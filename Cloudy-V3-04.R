@@ -555,7 +555,8 @@ if(fail == 0){ ##Control LVL 2
     #we build in this simple check to make sure the treshold is not placed into the positive band
     if(tresh > piik[3, 2]){ ##Control LVL 4
         badluck[7] <- TRUE
-        tresh <-  tresh.bup1
+         tresh <-  min(tresh.bup1, piik[3, 2])  ### in fact there is no guarantuee that tresh.bup1 is outside the positive cloud.
+                                 # therefore, we'll take either tresh.bup1 or the lower bound on the pos cloud, whichever is lower
     }##Control LVL 4 END
     }# end if(is.na(threshold))
 
