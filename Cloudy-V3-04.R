@@ -631,6 +631,9 @@ if(fail == 0){ ##Control LVL 2
      dfdrops$ordr <- sample(c(1:nrow(dfdrops)), size = nrow(dfdrops), replace = F)
      # unfortunately our plan for using geom_density does not work out well, both populations get scaled differently which gives a very misleading plot
      # so we must make a separate plotting data frame:
+      # for graphical purposes we limit the upper bound of the bandiwth otherwise things can get over-smoothed
+       temp <- bw.nrd0(drp1)
+       if(temp < 50){temp <- 50}else if(temp > diff(range(drp1))/40){temp <- floor(diff(range(drp1))/40)}     
      dens <- density(drp1)
      plotdf <- data.frame(x=dens$x, y=dens$y)
      plotdf$dropsplit <- factor(findInterval(plotdf$x, tresh))
