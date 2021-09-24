@@ -51,14 +51,20 @@ This is the original algorithm provided as supplemental material to the publicat
 ### V2.05 & 2.08
 These two versions are optimizations of the original algorithm, with version 2.08 being the final version of the V2 series of the algorithm. The main improvements are: general improvements for stability, removal of typos, increased robustness when dealing with overlapping populations, a manual threshold option, the threshold as calculated was added to output, and one of the plots was removed (performance parameter plot, it was not getting the point accross anyway).
 
-### V3.03 & beyond
-V3.03 was the first public version of the V3 series of the algortihm. This series has a thoroughly re-structured code that will allow further implementation of additional functionalities, chief among which is the ability to 'correct' for channel cross talk. The latter is a phenomenon caused by overlapping or overshining of color spectra of the dye(s) and as a result the measurements made in the 2 fluorescence channels are not entirely independent. This is most obvious from the 2D plot (channel 1 FU on x axis and channel 2 FU on y axis): in an ideal case increase in channel 1 fluorescence should not affect the y position of the droplets, instead we see that the channel 2 fluorescence also increases (droplets move diagonal on the plot instead of horizontal). The figure below illustrates this for an evagreen reaction: instead of the droplets all lying in the horizontal plane (all fluorescence limited to channel 1) we see a diagonal display as also channel 2 fluorescence increases when channel 1 FU reaches higher values. Ultimately, this affects the resolution of the assay.
+### V3 & beyond
+This series has a thoroughly re-structured code that will allow further implementation of additional functionalities. The main change for the user is probably the way the data are presented to the algorithm. Whereas in previous versions a single channel of a sigle reaction had to used as input, these version will take the entire read.QX output object as input. A seperate input variable 'well' allows for selection of which well(s) to analyse. Choice of the channel is done via the 'method' input variable.
+
+Chief among the new functionalities is the ability to 'correct' for channel cross talk. The latter is a phenomenon caused by overlapping or overshining of color spectra of the dye(s) and as a result the measurements made in the 2 fluorescence channels are not entirely independent. This is most obvious from the 2D plot (channel 1 FU on x axis and channel 2 FU on y axis): in an ideal case increase in channel 1 fluorescence should not affect the y position of the droplets, instead we see that the channel 2 fluorescence also increases (droplets move diagonal on the plot instead of horizontal). The figure below illustrates this for an evagreen reaction: instead of the droplets all lying in the horizontal plane (all fluorescence limited to channel 1) we see a diagonal display as also channel 2 fluorescence increases when channel 1 FU reaches higher values. Ultimately, this affects the resolution of the assay.
 
 ![crosstalk](crosstalk.png)
 
-The current version is able to correct for this to some degree (currenlty only intended for Evagreen reactions, but feel free to play around), which helps place the threshold in low resolution reactions. It has been tested on a wide array of reactions (more than 5000) and seems stable. Single channel analysis remains available as before. Note: since the cross-talk correction relies on a few iterations of algorithm application it runs slower. 
+The current version is able to correct for this to some degree (currenlty only intended for Evagreen reactions, but feel free to play around), which helps place the threshold in low resolution reactions. It has been tested on a wide array of reactions (more than 5000) and seems stable. Note: since the cross-talk correction relies on a few iterations of algorithm application it runs slower. 
 
-Another new feature of the V3 series is that the algorithm will automaticall recognize if it is being applied to multiple reactions and will analyze all at once. When reading multiple reactions with `read.QX` you can call `cloudy` on the resulting list and all reactions will be analyzed. Since version V3.04 it is also possible to restrict the algorithm to a specific reactions in a dataset (when providing multiple reactions) via the `well` input variable.
+Other analysis modes include: simplex (analysis of channel 1), simplex2 (analysis of channel 2), duplex (analysis of both channels), and the aforementioned 'eva' mode that corrects for channel cross talk.
+
+Another new feature of the V3 series is the option to choose different threshold setting approaches. I have implemented the Generalized Extreme Value (GEV) approach of Trypsteen et al. ([go read their publication](https://link.springer.com/article/10.1007/s00216-015-8773-4)) on a single reaction basis. It should be noted that the method is intended to be used on NTC reactions to calculate a threshold that is than applied accross other (baseline corrected) other reactions, because the 'extreme values' should be sampled from the true negative distribution in order to calculate the threshold. I've worked around this by using the 'rough guess where the populations are' (that is the first step in the cloudy algorithm) to select which droplets to feed into the GEV routine. This works well, but is sensitive to rain and of course cannot be used if there are not enough negative droplets. Where 'cloudy' is fairly conservative in its threshold placement, 'gev' tends to set threshold very close to the negative cloud. To use it, specify `threshold = "gev"`.
+
+Another threshold option available is 'mixed' here, 'cloudy' and 'gev' are run sequential, giving 'gev' the benefit of a better negative population selection as performed by 'cloudy'. Both thresholds are calculated and averaged, providing a third option in threshold calculation. As 'gev' tends to fail in reactions that are close to saturation, 'cloudy' is always used as back-up mechanism, ensuring valid output. 
 
 ### algorithm output and input
 
@@ -70,25 +76,26 @@ The standard function output is a list with the following components:
 - `populations`, a numerical of length 1, the number of fluorescence populations as detected by the algorithm 
 - `threshold`, a numerical of length 1, the fluorescence value used as threshold 
 
-Note that if `vec` is set to `TRUE`, all of the above parameters are returned in a single vector rather than as a list
+Note that if `vec` is set to `TRUE`, all of the above parameters are returned in a single vector rather than as a list. If multiple reactions are analysed at the same time, the ouput will be a matrix with the columns corresponding to the results of the different reactions. 
+
+If more than one channel is analysed (e.g. in `method = "duplex"`) a second row will be added to the output for the second channel. If multiple reactions are analysed in duplex, the output will be a list containing two matrices (`$Ch1` and `$Ch2`) with the results of the corresponding channels.
  
 The basic function call to cloudy takes the following arguments:
 
 V2 series :  `cloudy(drp, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE)`  
-V3 series :  `cloudy(drp, method, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE, neg.ref = 13500)`  
-V3.04 and higer :  `cloudy(drp, well, method, dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE, neg.ref = 13500)`
+V3.07 and higer :  `cloudy(drp, well, method = , dVol = 0.85, sVol = 20, threshold = NA, plots = FALSE, silent = TRUE, vec = FALSE, neg.ref = 7500)`
 
 
-- `drp` is a numeric vector of all (endpoint) fluorescence measurments in a digital reaction in V2.XX but should be a named list in V3.XX. In the latter case, the input should contain 2 objects ('Ch1' and 'Ch2') each of which should be a matrix containing the (endpoint) fluorescence measurments (one column per reaction) from the appropriate fluorescence channel. For both versions: the readings do **not** have to be ordored in any particular way although Quantasoft export is usually sorted from small to large. `NA` values are allowed (will be removed). Negative values are allowed as well (baseline subtraction may cause these in the Quantasoft export).
+- `drp` is a numeric vector of all (endpoint) fluorescence measurments in a digital reaction in V2.XX but should be a named list in V3.XX. In the latter case, the input should contain 2 objects ('Ch1' and 'Ch2') each of which should be a matrix containing the (endpoint) fluorescence measurments (one column per reaction) from the appropriate fluorescence channel. Note that the latter is the native output format of `read.QX()`. For both versions: the readings do **not** have to be ordered in any particular way although Quantasoft export is usually sorted from small to large. `NA` values are allowed (will be removed). Negative values are allowed as well (baseline subtraction may cause these in the Quantasoft export).
 - `well` (for V3.04 and onwards) is a vector (either numerical or character) that selects which reactions are analyzed. Either by column number (eg `c(1,2,4,5)`) or
 by column name (eg `c("A01", "C02", "H12")`) in the 'drp' input. defaults to 'all' (analyzes all reactions in the dataset). Note that if the numbers/names do not match existing columns there will be a warning and **all** reactions will be analyzed.
+- `method` = (V3 only) string, type of analysis to be made. One of the following: "simplex", "simplex2", "duplex", or "eva" ('simplex' = analysis of the flourescence in channel 1, 'simplex2' = analysis of the flourescence in channel 2, "duplex" = simultanous analysis of channels 1 and 2, 'eva' = simplex analysis of channel 1 with channel crosstalk correction using channel 2 (designed for Evagreen)). (standard = "simplex)
+- `threshold` either string or numerical of length 1. It selects which threshold calculation method used, one of the following: "cloudy", "gev", "mixed" or a number. Using a number will manually sets the threshold for counting positive and negative droplets (in Fluorescence Units) and overrides the algorithms calculations. "cloudy" is the default option, for background on "gev" and "mixed" see the above text. 
 - `dVol` is a numerical of length 1, the compartment (droplet) volume in nanoliter (standard = 0.85)
 - `sVol` is a  numerical of length 1, the sample volume in microliter (standard = 20) 
 - `plots` is a logical, if set to `TRUE` plots will be generated (see below)
 - `silent` is a logical, if is set to `FALSE` warning messages will be generated detailing the choices the algorithm makes when deviating from the standard analysis routine. 
 - `vec` is a logical, if set to `TRUE` the results will be returned in a vector instead of a list. This is useful when you batch analyse dPCR reactions using `apply` and want the results to be returned as a matrix.
-- `threshold` is an optional numerical of length 1, it manually sets the threshold for counting positive and negative droplets (in Fluorescence Units) and overrides the algorithms calculations. The algorithm will still try to define the populations in order to calculate the other statistics. Note that even when wrong or invalid (eg below the negative population) the manual threshold will not be overruled.
-- `method` = (V3 only) string, type of analysis to be made. One of the following: "simplex", "simplex2", or "eva" ('simplex' = standard 'cloudy' analysis of the flourescence in channel 1, 'simplex2' = standard 'cloudy' analysis of the flourescence in channel 2, 'eva' = simplex analysis of channel 1 with channel crosstalk correction using channel 2 (designed for Evagreen)). (standard = "simplex)
 - `neg.ref` = (V3 only) is a numerical of length 1. This provides a reference where the algorithm expects the negative popultation to be. This will only be used when the algorithm can only find a single population: it wil serve as a reference to decide it the droplets are all negative or all positive. 
 
 When `plots = TRUE` the algortihm will produce two graphical windows with three visual representations of the analysis and its results (two in the first window, one in the second):
@@ -137,13 +144,16 @@ Local use of the shiny app is most straightforward using [Rstudio](https://www.r
 ![shiny](run_app.png)
 
 ## MonoColor ddPlot
-This is a very short function to quickly plot digital PCR output. I have written this function mainly because the droplet amplitude values are **sorted** in the QX200 output and when plotted as such result in something that is hard to interpret to human eyes. The function essentially just randomizes the readings before plotting, which also means that when you plot the same data twice it will look slightly different in both figures. The function is mainly intended as a tool to quickly inspect reactions when the results are not as you'd expect.
+This contains 2 very short functions to quickly plot digital PCR output (single channel plot: `ddplot()`, 2D plot: `tdplot()`). I have written these functions mainly because the droplet amplitude values are **sorted** in the QX200 output and when plotted as such result in something that is hard to interpret to human eyes. The function essentially just randomizes the readings before plotting, which also means that when you plot the same data twice it will look slightly different in both figures. The functions are mainly intended as a tool to quickly inspect reactions when the results are not as you'd expect.
 
-The basic function call to ddPlot takes the following argument:
+The basic function calls to ddplot and tdplot takes the following argument:
 ```
-ddplot(drp, ...)
+ddplot(drp, well, channel, ...)
+ddplot(drp, well, ...)
 ```
-- `drp` is a numeric vector of all (endpoint) fluorescence measurments in a digital reaction. `NA` values are allowed (will be removed).
+- `drp` a list that contains 2 objects ('Ch1' and 'Ch2') each of which should be a matrix containing the (endpoint) fluorescence measurments (one column per reaction) from the appropriate fluorescence channel. Note that the latter is the native output format of `read.QX()`
+- well is a numerical or string, selects which reactions are analyzed. Either by column number (eg `1`) or by column name (eg `"A01"`)
+- `channel` is a numerical: either `1`or `2` and selects which channel is plotted
 - `...` additional arguments and graphical parameters to be passed to the base `plot` command of R 
 
 Usage example:
@@ -153,7 +163,10 @@ load("dpcr-Example.RData")
 source("MonoColor ddPlot.R")
 
 # plot a reaction
-ddplot(dd.pcr$Ch1[, 1])
+ddplot(dd.pcr, well = "A01")
+
+# make a 2d plot of a reaction
+tdplot(dd.pcr, well = "A01")
 ```
 
 ## 'Dataset.zip':1 contents and strucuture
