@@ -15,14 +15,15 @@ Additional functions:
 
 The following paragraphs contain a brief overview of the functionality of these algorithms and fucntions. In most cases, details on their use is also contained as commented text in the .R files themselves. The very last paragraph contains information on the structure of the dataset provided (i.e. `Dataset.zip`).
 
-## The 'read.QX' algorithm
-This function reads the fluorescence values, as exported from the Biorad Quantasoft software, into R. To export the fluorescence readings, choose `options > export amplitude and cluster data` in the `setup` tab of the Quantasoft software (V1.6.6.0320). The software will prompt you to choose folder, for use with read_QX.R it is recommended that you choose an empty folder. For each well in the analysis, a .csv file will be created that contains the fluorescence reads for each channel as well as the assigned cluster.
+## The 'read.QX' & 'read.Naica' algorithm
+These functions read the raw fluorescence values, as exported from the Biorad or Stilla software, into R. F
 
 The function output is a list containing two matrices (one for each channel). Each column in the matrix is a reaction and each row contains fluorscence readings. As the number of readings per reaction may differ, reactions with less accepted droplets are padded with `NA` to fill the matrices. The order of the reactions in the matrix is the order in which they were read from the folder (usually alphabetical) it is therefore recommended to set `autoname = TRUE` in order to be able to identify each column correctly. The cluster data is currently not imported into R as the cloudy algortihm has no use for it. Note that the algorithm will attempt to read **any** .csv file present in a folder, so make sure that only .csv files containing raw ddPCR data are present.
 
 The basic function call to read.QX takes the following arguments:
 ```
 read.QX(directory, nr.r = NA, autoname = TRUE)
+read.Naica(directory, nr.r = NA, autoname = TRUE)
 ```
 - `directory` is a character vector of length 1 indicating the location of the CSV files (either path or name of the folder in the working directory)
 - `nr.r` is an optional numerical of length 1 indicating the number of rows to be used in the matrix (missing values will be padded with NA). If `nr.r = NA`, the largest number of droplets in the analysis will be used. This option is usefull if you want to read several folders of data and then merge the resulting matrices, for instance, using `cbind`.
