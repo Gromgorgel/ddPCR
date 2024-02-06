@@ -41,7 +41,9 @@ read.QX <- function(directory, nr.r = NA, autoname = TRUE){
   output.Ch1 <- matrix(, nrow = d.max, ncol = length(files)) #generate output file for channel 1
   output.Ch2 <- matrix(nrow = d.max, ncol = length(files)) #generate output file for channel 2
   for(i in seq_along(files)){        #read each file, add variable zero padding to max size and store in matrix
-        temp <- read.csv(files[i], skip = 1, header = F) #read csv file
+        first_lines <- readLines(files[i], n = 10)
+        skip <- grep("Ampl", first_lines) #determine first lines to skip for either QX200 or QX600 amplitude data files
+        temp <- read.csv(files[i], skip = skip, header = F) #read csv file
         n.dr <- dim(temp)[1] #check how many droplets were generated in this run
         #save data into output matrices
         output.Ch1[1:n.dr, i] <- temp[,1]
